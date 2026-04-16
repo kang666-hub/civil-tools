@@ -950,85 +950,147 @@ function renderRebarResults() {
 function drawRebar() {
   const canvas = document.getElementById('rebar-canvas');
   if(!canvas) return;
-  const W = canvas.offsetWidth||560, H = 280;
-  canvas.width=W; canvas.height=H;
+  const W = canvas.offsetWidth||560;
+  // 動態高度：根據牆高/底寬比例決定
+  const g = G();
+  const aspect = g.H / g.BWIDTH;
+  const H = Math.max(320, Math.min(700, W * aspect * 0.55));
+  canvas.height = H;
+  canvas.width = W;
   const ctx = canvas.getContext('2d');
   ctx.clearRect(0,0,W,H);
   ctx.fillStyle='#060a10'; ctx.fillRect(0,0,W,H);
 
-  const g = G();
-  const pad = 30;
-  const scX = (W-2*pad)/g.BWIDTH, scY = (H-2*pad)/g.H;
+  const padL=45, padR=20, padT=20, padB=35;
+  // 分別計算 X、Y 比例，各自填滿畫布
+  const scX = (W - padL - padR) / g.BWIDTH;
+  const scY = (H - padT - padB) / g.H;
+  // 用較小的那個，保持比例
   const sc = Math.min(scX, scY);
-  const ox = (W - g.BWIDTH*sc)/2, oy = H - pad;
+
+  const ox = padL + ((W-padL-padR) - g.BWIDTH*sc)/2;
+  const oy = H - padB;
   const BT=g.BTHICK*sc, BW=g.BWIDTH*sc;
   const wallH=(g.H-g.BTHICK)*sc, toe=g.TOE*sc;
   const wBot=g.WBOT*sc, wTop=g.WTOP*sc;
 
+  // 牆身漸縮（E 是牆厚差，代表背面斜率）
+  const wallSlant = (g.E - g.WBOT + g.WTOP) * sc / 10;
+
   // outline
   ctx.beginPath();
-  ctx.moveTo(ox,oy);
-  ctx.lineTo(ox+BW,oy);
-  ctx.lineTo(ox+BW,oy-BT);
-  ctx.lineTo(ox+toe+wBot,oy-BT);
-  ctx.lineTo(ox+toe+wTop+(g.E*sc/10), oy-BT-wallH);
-  ctx.lineTo(ox+toe, oy-BT-wallH);
-  ctx.lineTo(ox+toe, oy-BT);
-  ctx.lineTo(ox, oy-BT);
+  ctx.moveTo(ox, oy);                                          // 底板左下
+  ctx.lineTo(ox+BW, oy);                                       // 底板右下
+  ctx.lineTo(ox+BW, oy-BT);                                    // 底板右上
+  ctx.lineTo(ox+toe+wBot, oy-BT);                              // 牆身右下
+  ctx.lineTo(ox+toe+wTop+wallSlant, oy-BT-wallH);              // 牆身右上（含斜度）
+  ctx.lineTo(ox+toe, oy-BT-wallH);                             // 牆身左上
+  ctx.lineTo(ox+toe, oy-BT);                                   // 牆身左下
+  ctx.lineTo(ox, oy-BT);                                       // 底板左上
   ctx.closePath();
-  ctx.strokeStyle='rgba(0,180,255,0.7)'; ctx.lineWidth=1.5; ctx.stroke();
-  ctx.fillStyle='rgba(20,50,90,0.35)'; ctx.fill();
+  ctx.strokeStyle='rgba(0,180,255,0.8)'; ctx.lineWidth=1.5; ctx.stroke();
+  ctx.fillStyle='rgba(20,50,90,0.4)'; ctx.fill();
 
-  const cov=7.5*sc;
+  // 底板與牆身分界線
+  ctx.beginPath();
+  ctx.moveTo(ox, oy-BT); ctx.lineTo(ox+BW, oy-BT);
+  ctx.strokeStyle='rgba(0,180,255,0.3)'; ctx.lineWidth=0.8; ctx.setLineDash([4,4]); ctx.stroke();
+  ctx.setLineDash([]);
 
-  // draw rebar dots
+  const cov = 7.5*sc;
+
+  // draw rebar dots — 每根鋼筋沿牆長方向用圓點表示截面
   rebarDefs.forEach(rb=>{
     const cb = document.getElementById('cb_'+rb.id);
     if(cb && !cb.checked) return;
     const dia = +document.getElementById('dia_'+rb.id)?.value || rb.dia;
     const sp  = +document.getElementById('sp_'+rb.id)?.value  || rb.sp;
-    const r2 = Math.max(2, dia*sc*0.4);
+    const r2 = Math.max(2.5, Math.min(6, dia*sc*0.5));
+    const spPx = sp*sc;
 
     let positions=[];
     switch(rb.id){
-      case 'rb1': positions.push([ox+toe+cov+r2, oy-BT-wallH*0.2]); positions.push([ox+toe+cov+r2, oy-BT-wallH*0.6]); break;
-      case 'rb2': positions.push([ox+toe+wBot-cov-r2, oy-BT-wallH*0.25]); positions.push([ox+toe+wBot-cov-r2, oy-BT-wallH*0.65]); break;
+      // 牆身主筋前（沿牆高多點）
+      case 'rb1':
+        for(let f=0.05; f<1; f+=spPx/wallH)
+          positions.push([ox+toe+cov+r2, oy-BT-wallH*f]);
+        break;
+      // 牆身主筋後（沿牆高多點）
+      case 'rb2':
+        for(let f=0.05; f<1; f+=spPx/wallH)
+          positions.push([ox+toe+wBot-cov-r2, oy-BT-wallH*f]);
+        break;
+      // 牆身水平筋（沿牆高間距排列）
       case 'rb3':
-        for(let yy=0.15;yy<1;yy+=sp*sc/wallH)
-          positions.push([ox+toe+(wBot+wTop)/2, oy-BT-wallH*yy]);
+        for(let yy=cov+r2; yy<wallH-cov; yy+=spPx)
+          positions.push([ox+toe+wBot/2, oy-BT-yy]);
         break;
+      // 底板主筋下層（沿底板寬間距排列）
       case 'rb4':
-        for(let xx=0.1;xx<1;xx+=sp*sc/BW)
-          positions.push([ox+BW*xx, oy-cov-r2]);
+        for(let xx=cov+r2; xx<BW-cov; xx+=spPx)
+          positions.push([ox+xx, oy-cov-r2]);
         break;
+      // 底板主筋上層
       case 'rb5':
-        for(let xx=0.1;xx<1;xx+=sp*sc/BW)
-          positions.push([ox+BW*xx, oy-BT+cov+r2]);
+        for(let xx=cov+r2; xx<BW-cov; xx+=spPx)
+          positions.push([ox+xx, oy-BT+cov+r2]);
         break;
-      case 'rb6': positions.push([ox+toe/2+cov, oy-BT/2]); positions.push([ox+BW-g.HEEL*sc/2, oy-BT/2]); break;
-      case 'rb7': positions.push([ox+toe/2, oy-BT*0.3]); positions.push([ox+toe/2, oy-BT*0.7]); break;
-      case 'rb8': positions.push([ox+BW-g.HEEL*sc/2-cov, oy-BT*0.3]); break;
-      case 'rb9': positions.push([ox+BW-g.HEEL*sc/3, oy-BT*0.7]); break;
+      // 底板分佈筋（底板中間）
+      case 'rb6':
+        for(let xx=cov+r2; xx<BW-cov; xx+=spPx*1.5)
+          positions.push([ox+xx, oy-BT/2]);
+        break;
+      // 趾部筋
+      case 'rb7':
+        positions.push([ox+toe/2, oy-BT*0.25]);
+        positions.push([ox+toe/2, oy-BT*0.75]);
+        break;
+      // 跟部筋下
+      case 'rb8':
+        positions.push([ox+BW-g.HEEL*sc/2, oy-cov-r2]);
+        positions.push([ox+BW-g.HEEL*sc/4, oy-cov-r2]);
+        break;
+      // 跟部筋上
+      case 'rb9':
+        positions.push([ox+BW-g.HEEL*sc/2, oy-BT+cov+r2]);
+        positions.push([ox+BW-g.HEEL*sc/4, oy-BT+cov+r2]);
+        break;
     }
     positions.forEach(([px,py])=>{
       ctx.beginPath(); ctx.arc(px,py,r2,0,Math.PI*2);
-      ctx.fillStyle=rb.color; ctx.fill();
+      ctx.fillStyle=rb.color+'cc'; ctx.fill();
+      ctx.strokeStyle=rb.color; ctx.lineWidth=0.8; ctx.stroke();
     });
   });
 
-  // dimension lines
-  ctx.strokeStyle='rgba(255,210,63,0.4)'; ctx.lineWidth=0.8; ctx.setLineDash([3,4]);
-  // width
-  ctx.beginPath(); ctx.moveTo(ox,oy+12); ctx.lineTo(ox+BW,oy+12); ctx.stroke();
+  // ── 尺寸標註 ──
+  ctx.font=`${Math.max(9,sc*8)}px JetBrains Mono`;
+
+  // 底寬標註
+  ctx.strokeStyle='rgba(255,210,63,0.5)'; ctx.lineWidth=0.8; ctx.setLineDash([3,4]);
+  ctx.beginPath(); ctx.moveTo(ox, oy+12); ctx.lineTo(ox+BW, oy+12); ctx.stroke();
   ctx.setLineDash([]);
-  ctx.fillStyle='#ffd23f'; ctx.font='9px JetBrains Mono';
-  ctx.fillText('T='+g.BWIDTH, ox+BW/2-15, oy+22);
-  // height
+  ctx.fillStyle='#ffd23f';
+  ctx.textAlign='center';
+  ctx.fillText('T='+g.BWIDTH+'cm', ox+BW/2, oy+24);
+
+  // 牆高標註
   ctx.setLineDash([3,4]);
-  ctx.beginPath(); ctx.moveTo(ox-12,oy); ctx.lineTo(ox-12,oy-BT-wallH); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(ox-14, oy); ctx.lineTo(ox-14, oy-BT-wallH); ctx.stroke();
   ctx.setLineDash([]);
-  ctx.save(); ctx.translate(ox-22, oy-BT-wallH/2); ctx.rotate(-Math.PI/2);
-  ctx.fillText('H='+g.H, -15, 0); ctx.restore();
+  ctx.save();
+  ctx.translate(ox-26, oy-BT-wallH/2);
+  ctx.rotate(-Math.PI/2);
+  ctx.textAlign='center';
+  ctx.fillText('H='+g.H+'cm', 0, 0);
+  ctx.restore();
+
+  // TOE / HEEL 標註
+  ctx.fillStyle='rgba(0,200,255,0.6)';
+  ctx.textAlign='center'; ctx.font='8px JetBrains Mono';
+  ctx.fillText('TOE='+g.TOE, ox+toe/2, oy-BT-8);
+  ctx.fillText('HEEL='+g.HEEL, ox+toe+wBot+(BW-toe-wBot)/2, oy-BT-8);
+  ctx.fillText('W='+g.WBOT, ox+toe+wBot/2, oy-BT/2);
 }
 
 // ════════════════════════════════════════════════
