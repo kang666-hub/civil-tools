@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>擋土牆結構設計工具</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap');
+
+  :root {
+    --bg: #0a0d12;
+    --surface: #111720;
+    --surface2: #181f2c;
+    --border: #1e2d42;
+    --accent: #00c8ff;
+    --accent2: #ff6b35;
+    --accent3: #4dff91;
+    --text: #c8d8e8;
+    --text-dim: #5a7088;
+    --red: #ff4a6e;
+    --yellow: #ffd23f;
+    --purple: #b06bff;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 13px;
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  header {
+    background: linear-gradient(90deg, #0a0d12 0%, #0f1a28 50%, #0a0d12 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  header .logo {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+  header h1 {
+    font-size: 15px;
+    font-weight: 500;
+    color: #fff;
+    letter-spacing: 1px;
+  }
+  header .badge {
+    background: var(--accent);
+    color: #000;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    padding: 2px 7px;
+    border-radius: 2px;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+  .header-right { margin-left: auto; display: flex; gap: 8px; }
+
+  /* ── Tabs ── */
+  .tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    padding: 0 16px;
+  }
+  .tab {
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 12px;
+    color: var(--text-dim);
+    border-bottom: 2px solid transparent;
+    transition: all .2s;
+    letter-spacing: .5px;
+    white-space: nowrap;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* ── Layout ── */
+  .main { display: flex; height: calc(100vh - 88px); overflow: hidden; }
+  .panel-left { width: 320px; flex-shrink: 0; overflow-y: auto; border-right: 1px solid var(--border); padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+  .panel-right { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .card-header {
+    padding: 8px 12px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-header .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+  .card-body { padding: 12px; }
+
+  /* ── Form controls ── */
+  .form-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .form-row label {
+    width: 80px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    flex-shrink: 0;
+  }
+  .form-row input[type=number] {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 5px 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    border-radius: 3px;
+    outline: none;
+    transition: border-color .2s;
+  }
+  .form-row input[type=number]:focus { border-color: var(--accent); }
+  .form-row .unit {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    width: 24px;
+  }
+  .form-row .stepper {
+    display: flex; gap: 2px;
+  }
+  .form-row .stepper button {
+    width: 22px; height: 26px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    cursor: pointer;
+    font-size: 13px;
+    line-height: 1;
+    border-radius: 2px;
+    transition: background .15s;
+  }
+  .form-row .stepper button:hover { background: var(--border); }
+
+  /* ── Rebar row ── */
+  .rebar-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 7px;
+    font-size: 12px;
+  }
+  .rebar-row input[type=checkbox] { accent-color: var(--accent); }
+  .rebar-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    flex: 1;
+  }
+  .rebar-row select, .rebar-row input[type=number] {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 3px 5px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    border-radius: 2px;
+    outline: none;
+  }
+  .rebar-color { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+  /* ── Canvas ── */
+  #canvas3d {
+    width: 100%;
+    flex: 1;
+    display: block;
+    cursor: grab;
+    background: #060a10;
+  }
+  #canvas3d:active { cursor: grabbing; }
+
+  /* ── Bottom toolbar ── */
+  .toolbar {
+    padding: 8px 16px;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  /* ── Buttons ── */
+  .btn {
+    padding: 7px 16px;
+    border-radius: 3px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    letter-spacing: .5px;
+    transition: all .2s;
+  }
+  .btn-primary { background: var(--accent); color: #000; font-weight: 700; }
+  .btn-primary:hover { background: #22e0ff; }
+  .btn-outline { background: transparent; border-color: var(--accent); color: var(--accent); }
+  .btn-outline:hover { background: rgba(0,200,255,.1); }
+  .btn-orange { background: var(--accent2); color: #000; font-weight: 700; }
+  .btn-orange:hover { background: #ff8555; }
+  .btn-green { background: var(--accent3); color: #000; font-weight: 700; }
+  .btn-green:hover { background: #6fffaa; }
+  .btn-copy { background: var(--surface2); border-color: var(--border); color: var(--text); }
+  .btn-copy:hover { border-color: var(--text-dim); }
+
+  /* ── DXF preview ── */
+  #dxf-preview {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: #4dff91;
+    max-height: 120px;
+    overflow-y: auto;
+    white-space: pre;
+    line-height: 1.6;
+  }
+
+  /* ── Section tab content ── */
+  .tab-content { display: none; }
+  .tab-content.active { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+
+  /* ── Result grid ── */
+  .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .result-cell {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 8px 10px;
+  }
+  .result-cell .r-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .result-cell .r-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px;
+    color: var(--accent);
+    font-weight: 700;
+  }
+  .result-cell .r-unit { font-size: 10px; color: var(--text-dim); margin-left: 3px; }
+
+  /* ── Stability table ── */
+  .stab-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+  .stab-table th, .stab-table td {
+    border: 1px solid var(--border);
+    padding: 5px 8px;
+    text-align: left;
+  }
+  .stab-table th { background: var(--surface2); color: var(--accent); font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 1px; }
+  .stab-table td { font-family: 'JetBrains Mono', monospace; }
+  .ok { color: var(--accent3); }
+  .fail { color: var(--red); }
+  .warn { color: var(--yellow); }
+
+  /* ── Section canvas ── */
+  #section-canvas { width: 100%; flex: 1; background: #060a10; display: block; }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  .sep { height: 1px; background: var(--border); margin: 8px 0; }
+  .hint { font-size: 10px; color: var(--text-dim); font-family: 'JetBrains Mono', monospace; margin-top: 4px; }
+
+  /* ── 3D label overlay ── */
+  .canvas-wrap { position: relative; flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+  .canvas-overlay {
+    position: absolute;
+    top: 8px; left: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: rgba(0,200,255,.7);
+    pointer-events: none;
+    letter-spacing: 1px;
+  }
+  .canvas-hint {
+    position: absolute;
+    top: 8px; right: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--text-dim);
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">STRUCT</div>
+  <h1>擋土牆結構設計工具</h1>
+  <span class="badge">R-008</span>
+  <div class="header-right">
+    <button class="btn btn-orange" onclick="exportDXF()">⬇ 輸出 DXF</button>
+    <button class="btn btn-primary" onclick="recalcAll()">▶ 全部計算</button>
+  </div>
+</header>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('tab3d',this)">① 3D 模型</div>
+  <div class="tab" onclick="switchTab('tabSection',this)">② 斷面計算</div>
+  <div class="tab" onclick="switchTab('tabRebar',this)">③ 鋼筋配置</div>
+  <div class="tab" onclick="switchTab('tabDXF',this)">④ DXF 輸出</div>
+</div>
+
+<div class="main">
+
+  <!-- ─── LEFT PANEL ─── -->
+  <div class="panel-left">
+
+    <div class="card">
+      <div class="card-header"><div class="dot"></div>基本參數</div>
+      <div class="card-body">
+        <div class="form-row">
+          <label>牆高 H</label>
+          <div class="stepper"><button onclick="step('H',-10)">−</button></div>
+          <input type="number" id="H" value="1050" oninput="recalcAll()">
+          <div class="stepper"><button onclick="step('H',10)">+</button></div>
+          <span class="unit">cm</span>
+        </div>
+        <div class="form-row">
+          <label>段落長 L</label>
+          <div class="stepper"><button onclick="step('L',-10)">−</button></div>
+          <input type="number" id="L" value="100" oninput="recalcAll()">
+          <div class="stepper"><button onclick="step('L',10)">+</button></div>
+          <span class="unit">cm</span>
+        </div>
+        <div class="form-row">
+          <label>覆土深 Hs</label>
+          <input type="number" id="Hs" value="50" oninput="recalcAll()">
+          <span class="unit">cm</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="dot" style="background:var(--accent2)"></div>斷面尺寸</div>
+      <div class="card-body">
+        <div class="form-row"><label>J (牆厚頂)</label><input type="number" id="J" value="60" oninput="recalcAll()"><span class="unit">cm</span></div>
+        <div class="form-row"><label>E (牆厚差)</label><input type="number" id="E" value="105" oninput="recalcAll()"><span class="unit">cm</span></div>
+        <div class="form-row"><label>TOE</label><input type="number" id="TOE" value="75" oninput="recalcAll()"><span class="unit">cm</span></div>
+        <div class="form-row"><label>HEEL</label><input type="number" id="HEEL" value="285" oninput="recalcAll()"><span class="unit">cm</span></div>
+        <div class="form-row"><label>Wb底</label><input type="number" id="WBOT" value="90" oninput="recalcAll()"><span class="unit">cm</span></div>
+        <div class="form-row"><label>Wt頂</label><input type="number" id="WTOP" value="60" oninput="recalcAll()"><span class="unit">cm</span></div>
+        <div class="form-row"><label>底板總寬</label><input type="number" id="BWIDTH" value="450" oninput="recalcAll()"><span class="unit">cm</span></div>
+        <div class="form-row"><label>底板厚 d</label><input type="number" id="BTHICK" value="90" oninput="recalcAll()"><span class="unit">cm</span></div>
+        <div class="hint">底板總寬 = TOE + 牆底厚 + HEEL</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="dot" style="background:var(--accent3)"></div>土壤參數</div>
+      <div class="card-body">
+        <div class="form-row"><label>γ 土單重</label><input type="number" id="gamma" value="1.8" step="0.1" oninput="recalcAll()"><span class="unit">t/m³</span></div>
+        <div class="form-row"><label>φ 摩擦角</label><input type="number" id="phi" value="30" oninput="recalcAll()"><span class="unit">°</span></div>
+        <div class="form-row"><label>fs 摩擦係</label><input type="number" id="fs" value="0.5" step="0.05" oninput="recalcAll()"><span class="unit">—</span></div>
+        <div class="form-row"><label>qa 容許承</label><input type="number" id="qa" value="30" oninput="recalcAll()"><span class="unit">t/m²</span></div>
+        <div class="form-row"><label>fc' 混凝土</label><input type="number" id="fc" value="280" oninput="recalcAll()"><span class="unit">kgf</span></div>
+        <div class="form-row"><label>fy 鋼筋</label><input type="number" id="fy" value="4200" oninput="recalcAll()"><span class="unit">kgf</span></div>
+      </div>
+    </div>
+
+  </div><!-- /panel-left -->
+
+  <!-- ─── RIGHT PANEL ─── -->
+  <div class="panel-right">
+
+    <!-- TAB 1: 3D -->
+    <div id="tab3d" class="tab-content active">
+      <div class="canvas-wrap">
+        <canvas id="canvas3d"></canvas>
+        <div class="canvas-overlay" id="model-label">R-008 擋土牆 3D 模型</div>
+        <div class="canvas-hint">左鍵旋轉 · 中鍵平移 · 滾輪縮放</div>
+      </div>
+      <div class="toolbar">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-dim)">RENDER:</span>
+        <button class="btn btn-outline" onclick="setRenderMode('wire')">線框</button>
+        <button class="btn btn-outline" onclick="setRenderMode('solid')">實體</button>
+        <button class="btn btn-outline" onclick="setRenderMode('both')">線框+實體</button>
+        <button class="btn btn-outline" onclick="resetCamera()">重置視角</button>
+        <span style="margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-dim)" id="dim-label"></span>
+      </div>
+    </div>
+
+    <!-- TAB 2: Section Calc -->
+    <div id="tabSection" class="tab-content">
+      <div style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;">
+
+        <div class="card">
+          <div class="card-header"><div class="dot" style="background:var(--accent2)"></div>斷面幾何計算結果</div>
+          <div class="card-body">
+            <div class="result-grid" id="section-results"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><div class="dot" style="background:var(--red)"></div>穩定性驗算</div>
+          <div class="card-body">
+            <table class="stab-table" id="stab-table">
+              <thead><tr><th>檢核項目</th><th>計算值</th><th>容許值</th><th>安全係數</th><th>結果</th></tr></thead>
+              <tbody id="stab-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><div class="dot" style="background:var(--yellow)"></div>主動土壓力圖</div>
+          <div class="card-body">
+            <canvas id="section-canvas" height="260" style="width:100%;height:260px;"></canvas>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- TAB 3: Rebar -->
+    <div id="tabRebar" class="tab-content">
+      <div style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;">
+
+        <div class="card">
+          <div class="card-header"><div class="dot" style="background:var(--accent3)"></div>鋼筋配置</div>
+          <div class="card-body">
+            <div id="rebar-rows"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><div class="dot"></div>鋼筋用量估算</div>
+          <div class="card-body">
+            <div class="result-grid" id="rebar-results"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><div class="dot" style="background:var(--accent3)"></div>鋼筋斷面圖</div>
+          <div class="card-body">
+            <canvas id="rebar-canvas" height="280" style="width:100%;height:280px;background:#060a10;border-radius:3px;"></canvas>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- TAB 4: DXF -->
+    <div id="tabDXF" class="tab-content">
+      <div style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;">
+
+        <div class="card">
+          <div class="card-header"><div class="dot" style="background:var(--yellow)"></div>DXF 輸出設定</div>
+          <div class="card-body" style="display:flex;flex-direction:column;gap:8px;">
+            <div class="form-row"><label>輸出內容</label>
+              <label style="width:auto;color:var(--text);gap:4px;display:flex;align-items:center"><input type="checkbox" id="dxf_outline" checked> 輪廓線</label>&nbsp;
+              <label style="width:auto;color:var(--text);gap:4px;display:flex;align-items:center"><input type="checkbox" id="dxf_rebar" checked> 鋼筋</label>&nbsp;
+              <label style="width:auto;color:var(--text);gap:4px;display:flex;align-items:center"><input type="checkbox" id="dxf_dim" checked> 尺寸標註</label>
+            </div>
+            <div class="form-row"><label>圖面比例</label>
+              <select id="dxf_scale" style="background:var(--bg);border:1px solid var(--border);color:var(--text);padding:4px 8px;font-family:'JetBrains Mono',monospace;font-size:11px;border-radius:2px;">
+                <option>1:50</option><option selected>1:100</option><option>1:200</option>
+              </select>
+            </div>
+            <div class="form-row"><label>座標原點</label>
+              <select id="dxf_origin" style="background:var(--bg);border:1px solid var(--border);color:var(--text);padding:4px 8px;font-family:'JetBrains Mono',monospace;font-size:11px;border-radius:2px;">
+                <option>底板左下角</option><option>牆底中心</option><option>0,0,0</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><div class="dot" style="background:var(--accent3)"></div>DXF 預覽</div>
+          <div class="card-body">
+            <div id="dxf-preview">點擊下方按鈕產生 DXF...</div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-green" onclick="generateDXFPreview()">▶ 產生預覽</button>
+          <button class="btn btn-orange" onclick="exportDXF()">⬇ 下載 3D.dxf</button>
+          <button class="btn btn-copy" onclick="copyDXF()">複製 DXF</button>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><div class="dot" style="background:var(--text-dim)"></div>座標說明</div>
+          <div class="card-body" style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-dim);line-height:1.9;">
+            X = 斷面寬方向（底板左下為原點）<br>
+            Y = 牆高方向（↑）<br>
+            Z = 沿段落長方向（0 → L）<br>
+            單位：cm
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div><!-- /panel-right -->
+</div><!-- /main -->
+
+<script>
+// ════════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════════
+const G = () => ({
+  H:     +document.getElementById('H').value,
+  L:     +document.getElementById('L').value,
+  Hs:    +document.getElementById('Hs').value,
+  J:     +document.getElementById('J').value,
+  E:     +document.getElementById('E').value,
+  TOE:   +document.getElementById('TOE').value,
+  HEEL:  +document.getElementById('HEEL').value,
+  WBOT:  +document.getElementById('WBOT').value,
+  WTOP:  +document.getElementById('WTOP').value,
+  BWIDTH:+document.getElementById('BWIDTH').value,
+  BTHICK:+document.getElementById('BTHICK').value,
+  gamma: +document.getElementById('gamma').value,
+  phi:   +document.getElementById('phi').value,
+  fs:    +document.getElementById('fs').value,
+  qa:    +document.getElementById('qa').value,
+  fc:    +document.getElementById('fc').value,
+  fy:    +document.getElementById('fy').value,
+});
+
+let renderMode = 'both';
+let dxfContent = '';
+
+// rebar config
+const rebarDefs = [
+  { id:'rb1', label:'① 牆身主筋(前)',  color:'#ff4a6e', dia:32, sp:30, on:true },
+  { id:'rb2', label:'② 牆身主筋(後)',  color:'#ff8c42', dia:32, sp:30, on:true },
+  { id:'rb3', label:'③ 牆身水平筋',    color:'#4a90ff', dia:13, sp:30, on:true },
+  { id:'rb4', label:'④ 底板主筋(下)',  color:'#4a90ff', dia:13, sp:30, on:true },
+  { id:'rb5', label:'⑤ 底板主筋(上)',  color:'#4dff91', dia:13, sp:30, on:true },
+  { id:'rb6', label:'⑥ 底板分佈筋',    color:'#ff4a6e', dia:22, sp:30, on:true },
+  { id:'rb7', label:'⑦ 趾部筋',        color:'#ff8c42', dia:22, sp:30, on:true },
+  { id:'rb8', label:'⑧ 跟部筋(下)',    color:'#ff4a6e', dia:13, sp:30, on:true },
+  { id:'rb9', label:'⑨ 跟部筋(上)',    color:'#b06bff', dia:13, sp:30, on:true },
+];
+
+function step(id, delta) {
+  const el = document.getElementById(id);
+  el.value = Math.max(0, +el.value + delta);
+  recalcAll();
+}
+
+// ════════════════════════════════════════════════
+//  TAB SWITCH
+// ════════════════════════════════════════════════
+function switchTab(id, el) {
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById(id).classList.add('active');
+  setTimeout(()=>{ draw3D(); drawSection(); drawRebar(); },50);
+}
+
+// ════════════════════════════════════════════════
+//  3D RENDERER  (canvas 2.5D wireframe)
+// ════════════════════════════════════════════════
+let cam = { rx:-0.35, ry:0.6, tx:0, ty:0, scale:1 };
+let drag = { active:false, last:null, btn:0 };
+
+function initCanvas3D() {
+  const canvas = document.getElementById('canvas3d');
+  canvas.addEventListener('mousedown', e=>{ drag.active=true; drag.last={x:e.clientX,y:e.clientY}; drag.btn=e.button; });
+  canvas.addEventListener('mousemove', e=>{
+    if(!drag.active) return;
+    const dx=(e.clientX-drag.last.x), dy=(e.clientY-drag.last.y);
+    if(drag.btn===0){ cam.ry+=dx*0.007; cam.rx+=dy*0.007; }
+    else { cam.tx+=dx; cam.ty+=dy; }
+    drag.last={x:e.clientX,y:e.clientY};
+    draw3D();
+  });
+  canvas.addEventListener('mouseup', ()=>drag.active=false);
+  canvas.addEventListener('wheel', e=>{ cam.scale*=e.deltaY>0?0.92:1.09; draw3D(); },{passive:true});
+}
+
+function resetCamera() { cam={rx:-0.35,ry:0.6,tx:0,ty:0,scale:1}; draw3D(); }
+function setRenderMode(m){ renderMode=m; draw3D(); }
+
+function project(x,y,z,cx,cy,scale,rx,ry){
+  // rotate Y
+  const x1=x*Math.cos(ry)-z*Math.sin(ry);
+  const z1=x*Math.sin(ry)+z*Math.cos(ry);
+  // rotate X
+  const y2=y*Math.cos(rx)-z1*Math.sin(rx);
+  const z2=y*Math.sin(rx)+z1*Math.cos(rx);
+  return { sx: cx + x1*scale, sy: cy - y2*scale, z: z2 };
+}
+
+function draw3D() {
+  const canvas = document.getElementById('canvas3d');
+  const W = canvas.offsetWidth, H = canvas.offsetHeight;
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+
+  // gradient bg
+  const grad = ctx.createRadialGradient(W/2,H/2,10,W/2,H/2,Math.max(W,H)*0.7);
+  grad.addColorStop(0,'#0b1220'); grad.addColorStop(1,'#060a10');
+  ctx.fillStyle=grad; ctx.fillRect(0,0,W,H);
+
+  const g = G();
+  const cx = W/2 + cam.tx, cy = H/2 + cam.ty;
+  const sc = cam.scale * Math.min(W,H) / (g.H * 2.2);
+  const {rx,ry} = cam;
+
+  // build vertices
+  const BW = g.BWIDTH, BT = g.BTHICK, L = g.L;
+  const wallH = g.H - BT;
+  const wallBotW = g.WBOT, wallTopW = g.WTOP;
+  const toe = g.TOE;
+
+  // 8-point outline prism
+  // cross-section: bottom-left origin at (0,0)
+  const cs = [
+    [0, 0],
+    [BW, 0],
+    [BW, BT],
+    [toe+wallBotW, BT],
+    [toe+wallTopW+(g.E/10), g.H],   // wall top-right (tapered)
+    [toe, g.H],                      // wall top-left
+    [toe, BT],
+    [0, BT],
+  ];
+
+  function pt(xi,yi,zi){ return project((xi-BW/2)*0.01,(yi-g.H/2)*0.01,(zi-L/2)*0.01,cx,cy,sc*100,rx,ry); }
+
+  function face(pts2d, fill, stroke, lw=1){
+    ctx.beginPath();
+    ctx.moveTo(pts2d[0].sx, pts2d[0].sy);
+    pts2d.forEach(p=>ctx.lineTo(p.sx,p.sy));
+    ctx.closePath();
+    if(fill){ ctx.fillStyle=fill; ctx.fill(); }
+    if(stroke){ ctx.strokeStyle=stroke; ctx.lineWidth=lw; ctx.stroke(); }
+  }
+
+  const faces = [];
+  // generate 6 faces
+  const front  = cs.map(([x,y])=>pt(x,y,0));
+  const back   = cs.map(([x,y])=>pt(x,y,L));
+
+  // compute average z for sorting
+  const fz = arr=>arr.reduce((s,p)=>s+p.z,0)/arr.length;
+
+  // Side faces between consecutive cross-section points
+  for(let i=0;i<cs.length;i++){
+    const n=(i+1)%cs.length;
+    faces.push({ verts:[front[i],front[n],back[n],back[i]], z: fz([front[i],front[n],back[n],back[i]]) });
+  }
+  faces.push({ verts:front, z:fz(front), isFront:true });
+  faces.push({ verts:back,  z:fz(back),  isBack:true });
+
+  faces.sort((a,b)=>a.z-b.z);
+
+  const solidColor = 'rgba(20,45,75,0.75)';
+  const wireColor  = 'rgba(0,180,255,0.8)';
+
+  faces.forEach(f=>{
+    if(renderMode==='solid'||renderMode==='both')
+      face(f.verts, solidColor, null);
+    if(renderMode==='wire'||renderMode==='both')
+      face(f.verts, null, wireColor, 0.8);
+  });
+
+  // draw rebars
+  const enabledRebars = rebarDefs.filter(r=>{
+    const cb = document.getElementById('cb_'+r.id);
+    return cb ? cb.checked : r.on;
+  });
+
+  enabledRebars.forEach(rb=>{
+    // simplified: draw rebar lines along Z axis at representative XY positions
+    const rebarPositions = getRebarXY(rb.id, g);
+    rebarPositions.forEach(([rx2,ry2])=>{
+      const p0 = pt(rx2,ry2,0), p1 = pt(rx2,ry2,L);
+      ctx.beginPath();
+      ctx.moveTo(p0.sx,p0.sy); ctx.lineTo(p1.sx,p1.sy);
+      ctx.strokeStyle=rb.color; ctx.lineWidth=1.5; ctx.stroke();
+    });
+  });
+
+  // axis
+  const O = pt(0,0,0), X = pt(60,0,0), Y = pt(0,60,0), Z = pt(0,0,60);
+  [[O,X,'#ff4a6e','X'],[O,Y,'#4dff91','Y'],[O,Z,'#4a90ff','Z']].forEach(([a,b,c,label])=>{
+    ctx.beginPath(); ctx.moveTo(a.sx,a.sy); ctx.lineTo(b.sx,b.sy);
+    ctx.strokeStyle=c; ctx.lineWidth=1.5; ctx.stroke();
+    ctx.fillStyle=c; ctx.font='bold 10px JetBrains Mono'; ctx.fillText(label,b.sx+4,b.sy+4);
+  });
+
+  document.getElementById('dim-label').textContent =
+    `H=${(g.H/100).toFixed(2)}m  B=${(g.BWIDTH/100).toFixed(2)}m  L=${(g.L/100).toFixed(2)}m`;
+}
+
+function getRebarXY(id, g) {
+  const cov=7.5, toe=g.TOE, BT=g.BTHICK, BW=g.BWIDTH, wallH=g.H-BT;
+  const wBot=g.WBOT, wTop=g.WTOP;
+  switch(id){
+    case 'rb1': return [[toe+cov+1.6, BT+wallH*0.25],[toe+cov+1.6, BT+wallH*0.75]];
+    case 'rb2': return [[toe+wBot-cov-1.6, BT+wallH*0.25],[toe+wBot-cov-1.6, BT+wallH*0.65]];
+    case 'rb3': return [[toe+cov+1.6, BT+wallH*0.4],[toe+wBot-cov-1.6, BT+wallH*0.4]];
+    case 'rb4': return [[toe/2, cov+1.1],[BW-g.HEEL/2, cov+1.1]];
+    case 'rb5': return [[toe/2, BT-cov-1.1],[BW-g.HEEL/2, BT-cov-1.1]];
+    case 'rb6': return [[BW/4, BT/2],[BW*3/4, BT/2]];
+    case 'rb7': return [[toe/2, BT/3],[toe/2, BT*2/3]];
+    case 'rb8': return [[BW-g.HEEL/2, BT/3]];
+    case 'rb9': return [[BW-g.HEEL/3, BT*2/3]];
+    default: return [];
+  }
+}
+
+// ════════════════════════════════════════════════
+//  SECTION CALCULATION
+// ════════════════════════════════════════════════
+function calcSection() {
+  const g = G();
+  const H_m = g.H/100, B_m = g.BWIDTH/100, BT_m = g.BTHICK/100, L_m = g.L/100;
+  const phi_r = g.phi * Math.PI / 180;
+  const Ka = Math.tan(Math.PI/4 - phi_r/2)**2;
+  const wallH_m = H_m - BT_m;
+  const Pa = 0.5 * g.gamma * Ka * wallH_m**2; // t/m
+  const Ypa = wallH_m/3; // from base of wall (triangle)
+
+  // weight of concrete (2.4 t/m³)
+  const Wwall = 2.4 * (g.WBOT+g.WTOP)/200 * wallH_m * L_m;
+  const Wbase = 2.4 * B_m * BT_m * L_m;
+  const Wsoil = g.gamma * (g.HEEL/100) * wallH_m * L_m;
+  const Wtotal = Wwall + Wbase + Wsoil;
+
+  // sliding
+  const Fs_slide = (Wtotal * g.fs) / (Pa * L_m);
+
+  // overturning moment about toe
+  const Mo = Pa * L_m * (Ypa + BT_m);
+  const Mr_wall = Wwall * (g.TOE/100 + (g.WBOT+g.WTOP)/400);
+  const Mr_base = Wbase * B_m/2;
+  const Mr_soil = Wsoil * (B_m - g.HEEL/200);
+  const Mr = Mr_wall + Mr_base + Mr_soil;
+  const Fs_over = Mr / Mo;
+
+  // bearing
+  const N = Wtotal;
+  const e = B_m/2 - (Mr - Mo) / N;
+  const q_max = N / (B_m * L_m) * (1 + 6*e/B_m);
+  const q_min = N / (B_m * L_m) * (1 - 6*e/B_m);
+  const Fs_bear = g.qa / q_max;
+
+  return { Ka, Pa, Ypa, Wwall, Wbase, Wsoil, Wtotal, Fs_slide, Fs_over, q_max, q_min, Fs_bear, e, B_m };
+}
+
+function renderSectionResults() {
+  const g = G(), r = calcSection();
+  document.getElementById('section-results').innerHTML = `
+    <div class="result-cell"><div class="r-label">Ka 主動土壓係數</div><div class="r-value">${r.Ka.toFixed(3)}</div></div>
+    <div class="result-cell"><div class="r-label">Pa 主動土壓力</div><div class="r-value">${r.Pa.toFixed(2)}<span class="r-unit">t/m</span></div></div>
+    <div class="result-cell"><div class="r-label">W 牆體自重</div><div class="r-value">${r.Wwall.toFixed(1)}<span class="r-unit">t</span></div></div>
+    <div class="result-cell"><div class="r-label">W 底板自重</div><div class="r-value">${r.Wbase.toFixed(1)}<span class="r-unit">t</span></div></div>
+    <div class="result-cell"><div class="r-label">W 覆土重</div><div class="r-value">${r.Wsoil.toFixed(1)}<span class="r-unit">t</span></div></div>
+    <div class="result-cell"><div class="r-label">W 總垂直力</div><div class="r-value">${r.Wtotal.toFixed(1)}<span class="r-unit">t</span></div></div>
+    <div class="result-cell"><div class="r-label">q_max 最大基壓</div><div class="r-value">${r.q_max.toFixed(2)}<span class="r-unit">t/m²</span></div></div>
+    <div class="result-cell"><div class="r-label">q_min 最小基壓</div><div class="r-value">${r.q_min.toFixed(2)}<span class="r-unit">t/m²</span></div></div>
+    <div class="result-cell"><div class="r-label">偏心距 e</div><div class="r-value">${(r.e*100).toFixed(1)}<span class="r-unit">cm</span></div></div>
+    <div class="result-cell"><div class="r-label">B/6</div><div class="r-value">${(r.B_m*100/6).toFixed(1)}<span class="r-unit">cm</span></div></div>
+  `;
+
+  const rows = [
+    { name:'滑動穩定', val:r.Fs_slide, allow:1.5 },
+    { name:'傾覆穩定', val:r.Fs_over,  allow:2.0 },
+    { name:'承載穩定', val:r.Fs_bear,  allow:1.0, inv:false },
+  ];
+  document.getElementById('stab-body').innerHTML = rows.map(row=>{
+    const ratio = row.val;
+    const ok = ratio >= row.allow;
+    const cls = ok ? 'ok' : 'fail';
+    const mark = ok ? '✔ OK' : '✘ NG';
+    return `<tr>
+      <td>${row.name}</td>
+      <td class="${cls}" style="font-weight:700">${ratio.toFixed(3)}</td>
+      <td>&ge; ${row.allow.toFixed1 || row.allow}</td>
+      <td>${(ratio/row.allow*100).toFixed(0)}%</td>
+      <td class="${cls}" style="font-weight:700">${mark}</td>
+    </tr>`;
+  }).join('');
+}
+
+function drawSection() {
+  const canvas = document.getElementById('section-canvas');
+  if(!canvas) return;
+  const W = canvas.offsetWidth||600, H = 260;
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#060a10'; ctx.fillRect(0,0,W,H);
+
+  const g = G(), r = calcSection();
+  const wallH_m = g.H/100 - g.BTHICK/100;
+  const scY = (H-40) / (g.H/100 * 1.1);
+  const scX = (W*0.3) / (0.5 * g.gamma * r.Ka * wallH_m**2 * 1.2);
+
+  const ox = W*0.5, oyTop = 20, oyBot = H-20;
+  const wallTop = oyTop, wallBot = oyBot - g.BTHICK/100*scY;
+
+  // Draw wall axis
+  ctx.beginPath(); ctx.moveTo(ox, wallTop); ctx.lineTo(ox, oyBot);
+  ctx.strokeStyle='rgba(0,200,255,0.3)'; ctx.lineWidth=1; ctx.setLineDash([4,4]); ctx.stroke(); ctx.setLineDash([]);
+
+  // pressure triangle
+  const paAtBot = g.gamma * r.Ka * wallH_m * scX;
+  ctx.beginPath();
+  ctx.moveTo(ox, wallTop);
+  ctx.lineTo(ox, wallBot);
+  ctx.lineTo(ox - paAtBot, wallBot);
+  ctx.closePath();
+  ctx.fillStyle='rgba(255,107,53,0.2)'; ctx.fill();
+  ctx.strokeStyle='#ff6b35'; ctx.lineWidth=1.5; ctx.stroke();
+
+  // labels
+  ctx.fillStyle='#ff6b35'; ctx.font='11px JetBrains Mono';
+  ctx.fillText(`Pa=${r.Pa.toFixed(2)} t/m`, ox-paAtBot-5, wallBot-10);
+  ctx.fillStyle='rgba(0,200,255,0.8)';
+  ctx.fillText('Ka='+r.Ka.toFixed(3), ox+8, wallTop+14);
+  ctx.fillText('H_w='+(wallH_m.toFixed(2))+'m', ox+8, wallTop+30);
+
+  // resultant arrow
+  const yArrow = wallBot - wallH_m/3*scY;
+  ctx.beginPath();
+  ctx.moveTo(ox-paAtBot*0.5-20, yArrow); ctx.lineTo(ox-paAtBot*0.5+20, yArrow);
+  ctx.moveTo(ox-paAtBot*0.5+20, yArrow); ctx.lineTo(ox-paAtBot*0.5+10, yArrow-5);
+  ctx.moveTo(ox-paAtBot*0.5+20, yArrow); ctx.lineTo(ox-paAtBot*0.5+10, yArrow+5);
+  ctx.strokeStyle='#ffd23f'; ctx.lineWidth=1.5; ctx.stroke();
+  ctx.fillStyle='#ffd23f'; ctx.font='10px JetBrains Mono';
+  ctx.fillText('H/3', ox-paAtBot*0.5-30, yArrow-6);
+
+  // base pressure diagram
+  const scB = W*0.35 / g.BWIDTH * 100;
+  const bLeft = W*0.55, bY = oyBot-5;
+  ctx.beginPath();
+  ctx.moveTo(bLeft, bY);
+  ctx.lineTo(bLeft + g.BWIDTH*scB/100, bY);
+  const qMax_sc = r.q_max/g.qa*40, qMin_sc = r.q_min/g.qa*40;
+  ctx.lineTo(bLeft + g.BWIDTH*scB/100, bY - qMax_sc);
+  ctx.lineTo(bLeft, bY - qMin_sc);
+  ctx.closePath();
+  ctx.fillStyle='rgba(77,255,145,0.15)'; ctx.fill();
+  ctx.strokeStyle='#4dff91'; ctx.lineWidth=1.2; ctx.stroke();
+  ctx.fillStyle='#4dff91'; ctx.font='9px JetBrains Mono';
+  ctx.fillText(`q_max=${r.q_max.toFixed(1)}`, bLeft+g.BWIDTH*scB/100-60, bY-qMax_sc-4);
+  ctx.fillText(`q_min=${r.q_min.toFixed(1)}`, bLeft-5, bY-qMin_sc-4);
+  ctx.fillStyle='rgba(77,255,145,0.5)'; ctx.font='9px JetBrains Mono';
+  ctx.fillText('t/m²', bLeft+g.BWIDTH*scB/200, bY-20);
+}
+
+// ════════════════════════════════════════════════
+//  REBAR
+// ════════════════════════════════════════════════
+const diaOptions = [10,13,16,19,22,25,29,32,36];
+const spOptions  = [10,15,20,25,30];
+
+function buildRebarUI() {
+  const cont = document.getElementById('rebar-rows');
+  cont.innerHTML = rebarDefs.map(rb=>`
+    <div class="rebar-row">
+      <input type="checkbox" id="cb_${rb.id}" ${rb.on?'checked':''} onchange="recalcAll()">
+      <div class="rebar-color" style="background:${rb.color}"></div>
+      <span class="rebar-label" style="color:${rb.color}">${rb.label}</span>
+      D<select id="dia_${rb.id}" onchange="recalcAll()">
+        ${diaOptions.map(d=>`<option ${d===rb.dia?'selected':''}>${d}</option>`).join('')}
+      </select>
+      @<select id="sp_${rb.id}" onchange="recalcAll()">
+        ${spOptions.map(s=>`<option ${s===rb.sp?'selected':''}>${s}</option>`).join('')}
+      </select>cm
+    </div>
+  `).join('');
+}
+
+function calcRebarQty() {
+  const g = G();
+  const wallH_m = (g.H - g.BTHICK)/100;
+  const B_m = g.BWIDTH/100, L_m = g.L/100;
+  let totalKg = 0;
+  const rows = rebarDefs.map(rb=>{
+    const dia = +document.getElementById('dia_'+rb.id)?.value || rb.dia;
+    const sp  = +document.getElementById('sp_'+rb.id)?.value  || rb.sp;
+    const cb  = document.getElementById('cb_'+rb.id)?.checked;
+    if(!cb) return null;
+    const unitW = (dia**2)*0.00617; // kg/m  D²×0.00617
+    let len=0, n=0;
+    // rough estimate by zone
+    if(rb.id==='rb1'||rb.id==='rb2'){ n=Math.ceil(L_m/(sp/100)); len=wallH_m*n; }
+    else if(rb.id==='rb3'){ n=Math.ceil(wallH_m/(sp/100)); len=((g.WBOT+g.WTOP)/200)*n; }
+    else if(rb.id==='rb4'||rb.id==='rb5'){ n=Math.ceil(L_m/(sp/100)); len=B_m*n; }
+    else if(rb.id==='rb6'){ n=Math.ceil(L_m/(sp/100)); len=B_m*n*0.7; }
+    else { n=Math.ceil(L_m/(sp/100)); len=B_m*n*0.5; }
+    const kg = len * unitW;
+    totalKg += kg;
+    return { label:rb.label, dia, sp, n, len:len.toFixed(1), kg:kg.toFixed(1), color:rb.color };
+  }).filter(Boolean);
+  return { rows, totalKg };
+}
+
+function renderRebarResults() {
+  const { rows, totalKg } = calcRebarQty();
+  document.getElementById('rebar-results').innerHTML = `
+    <div class="result-cell" style="grid-column:span 2">
+      <div class="r-label">鋼筋總用量（估算）</div>
+      <div class="r-value">${totalKg.toFixed(0)}<span class="r-unit">kg</span>&nbsp;&nbsp;<span style="font-size:12px;color:var(--text-dim)">${(totalKg/1000).toFixed(2)} t</span></div>
+    </div>
+    ${rows.map(r=>`
+      <div class="result-cell">
+        <div class="r-label" style="color:${r.color}">${r.label}</div>
+        <div class="r-value" style="font-size:12px;color:${r.color}">D${r.dia}@${r.sp} · ${r.kg}kg</div>
+      </div>
+    `).join('')}
+  `;
+}
+
+function drawRebar() {
+  const canvas = document.getElementById('rebar-canvas');
+  if(!canvas) return;
+  const W = canvas.offsetWidth||560, H = 280;
+  canvas.width=W; canvas.height=H;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#060a10'; ctx.fillRect(0,0,W,H);
+
+  const g = G();
+  const pad = 30;
+  const scX = (W-2*pad)/g.BWIDTH, scY = (H-2*pad)/g.H;
+  const sc = Math.min(scX, scY);
+  const ox = (W - g.BWIDTH*sc)/2, oy = H - pad;
+  const BT=g.BTHICK*sc, BW=g.BWIDTH*sc;
+  const wallH=(g.H-g.BTHICK)*sc, toe=g.TOE*sc;
+  const wBot=g.WBOT*sc, wTop=g.WTOP*sc;
+
+  // outline
+  ctx.beginPath();
+  ctx.moveTo(ox,oy);
+  ctx.lineTo(ox+BW,oy);
+  ctx.lineTo(ox+BW,oy-BT);
+  ctx.lineTo(ox+toe+wBot,oy-BT);
+  ctx.lineTo(ox+toe+wTop+(g.E*sc/10), oy-BT-wallH);
+  ctx.lineTo(ox+toe, oy-BT-wallH);
+  ctx.lineTo(ox+toe, oy-BT);
+  ctx.lineTo(ox, oy-BT);
+  ctx.closePath();
+  ctx.strokeStyle='rgba(0,180,255,0.7)'; ctx.lineWidth=1.5; ctx.stroke();
+  ctx.fillStyle='rgba(20,50,90,0.35)'; ctx.fill();
+
+  const cov=7.5*sc;
+
+  // draw rebar dots
+  rebarDefs.forEach(rb=>{
+    const cb = document.getElementById('cb_'+rb.id);
+    if(cb && !cb.checked) return;
+    const dia = +document.getElementById('dia_'+rb.id)?.value || rb.dia;
+    const sp  = +document.getElementById('sp_'+rb.id)?.value  || rb.sp;
+    const r2 = Math.max(2, dia*sc*0.4);
+
+    let positions=[];
+    switch(rb.id){
+      case 'rb1': positions.push([ox+toe+cov+r2, oy-BT-wallH*0.2]); positions.push([ox+toe+cov+r2, oy-BT-wallH*0.6]); break;
+      case 'rb2': positions.push([ox+toe+wBot-cov-r2, oy-BT-wallH*0.25]); positions.push([ox+toe+wBot-cov-r2, oy-BT-wallH*0.65]); break;
+      case 'rb3':
+        for(let yy=0.15;yy<1;yy+=sp*sc/wallH)
+          positions.push([ox+toe+(wBot+wTop)/2, oy-BT-wallH*yy]);
+        break;
+      case 'rb4':
+        for(let xx=0.1;xx<1;xx+=sp*sc/BW)
+          positions.push([ox+BW*xx, oy-cov-r2]);
+        break;
+      case 'rb5':
+        for(let xx=0.1;xx<1;xx+=sp*sc/BW)
+          positions.push([ox+BW*xx, oy-BT+cov+r2]);
+        break;
+      case 'rb6': positions.push([ox+toe/2+cov, oy-BT/2]); positions.push([ox+BW-g.HEEL*sc/2, oy-BT/2]); break;
+      case 'rb7': positions.push([ox+toe/2, oy-BT*0.3]); positions.push([ox+toe/2, oy-BT*0.7]); break;
+      case 'rb8': positions.push([ox+BW-g.HEEL*sc/2-cov, oy-BT*0.3]); break;
+      case 'rb9': positions.push([ox+BW-g.HEEL*sc/3, oy-BT*0.7]); break;
+    }
+    positions.forEach(([px,py])=>{
+      ctx.beginPath(); ctx.arc(px,py,r2,0,Math.PI*2);
+      ctx.fillStyle=rb.color; ctx.fill();
+    });
+  });
+
+  // dimension lines
+  ctx.strokeStyle='rgba(255,210,63,0.4)'; ctx.lineWidth=0.8; ctx.setLineDash([3,4]);
+  // width
+  ctx.beginPath(); ctx.moveTo(ox,oy+12); ctx.lineTo(ox+BW,oy+12); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle='#ffd23f'; ctx.font='9px JetBrains Mono';
+  ctx.fillText('T='+g.BWIDTH, ox+BW/2-15, oy+22);
+  // height
+  ctx.setLineDash([3,4]);
+  ctx.beginPath(); ctx.moveTo(ox-12,oy); ctx.lineTo(ox-12,oy-BT-wallH); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.save(); ctx.translate(ox-22, oy-BT-wallH/2); ctx.rotate(-Math.PI/2);
+  ctx.fillText('H='+g.H, -15, 0); ctx.restore();
+}
+
+// ════════════════════════════════════════════════
+//  DXF GENERATION
+// ════════════════════════════════════════════════
+function buildDXF() {
+  const g = G();
+  const wallH = g.H - g.BTHICK;
+  const lines = [];
+
+  function header() {
+    lines.push('0\nSECTION\n2\nHEADER\n9\n$ACADVER\n1\nAC1009\n9\n$INSUNITS\n70\n5\n0\nENDSEC');
+  }
+  function layerDef(name,color){
+    return `0\nLAYER\n2\n${name}\n70\n0\n62\n${color}\n6\nCONTINUOUS`;
+  }
+  function tables() {
+    lines.push('0\nSECTION\n2\nTABLES\n0\nTABLE\n2\nLAYER\n70\n10');
+    lines.push(layerDef('OUTLINE',5));
+    lines.push(layerDef('REBAR_WALL_FRONT',1));
+    lines.push(layerDef('REBAR_WALL_BACK',3));
+    lines.push(layerDef('REBAR_HORIZ',4));
+    lines.push(layerDef('REBAR_BASE',2));
+    lines.push(layerDef('REBAR_BASE_TOP',6));
+    lines.push(layerDef('REBAR_DIST',1));
+    lines.push(layerDef('REBAR_TOE',3));
+    lines.push(layerDef('REBAR_HEEL_BOT',1));
+    lines.push(layerDef('REBAR_HEEL_TOP',6));
+    lines.push(layerDef('DIMENSIONS',3));
+    lines.push('0\nENDTAB\n0\nENDSEC');
+  }
+
+  function line3d(x1,y1,z1,x2,y2,z2,layer){
+    return `0\nLINE\n8\n${layer}\n10\n${x1.toFixed(2)}\n20\n${y1.toFixed(2)}\n30\n${z1.toFixed(2)}\n11\n${x2.toFixed(2)}\n21\n${y2.toFixed(2)}\n31\n${z2.toFixed(2)}`;
+  }
+  function text(x,y,z,h,txt,layer){
+    return `0\nTEXT\n8\n${layer}\n10\n${x.toFixed(2)}\n20\n${y.toFixed(2)}\n30\n${z.toFixed(2)}\n40\n${h}\n1\n${txt}`;
+  }
+
+  function entities() {
+    const ents=[];
+    const L=g.L, BW=g.BWIDTH, BT=g.BTHICK;
+    const toe=g.TOE, heel=g.HEEL, wBot=g.WBOT, wTop=g.WTOP;
+
+    // Outline cross-section extruded along Z
+    const cs = [
+      [0,0],[BW,0],[BW,BT],[toe+wBot,BT],
+      [toe+wTop+(g.E/10),g.H],[toe,g.H],[toe,BT],[0,BT]
+    ];
+    // front face
+    for(let i=0;i<cs.length;i++){
+      const n=(i+1)%cs.length;
+      ents.push(line3d(cs[i][0],cs[i][1],0,cs[n][0],cs[n][1],0,'OUTLINE'));
+      ents.push(line3d(cs[i][0],cs[i][1],L,cs[n][0],cs[n][1],L,'OUTLINE'));
+      ents.push(line3d(cs[i][0],cs[i][1],0,cs[i][0],cs[i][1],L,'OUTLINE'));
+    }
+
+    // Rebar lines
+    const cov=7.5;
+    const rebarZones = [
+      { layer:'REBAR_WALL_FRONT', pts:[[toe+cov+1.6, BT+wallH*0.1],[toe+cov+1.6, g.H-cov]] },
+      { layer:'REBAR_WALL_BACK',  pts:[[toe+wBot-cov-1.6, BT+wallH*0.1],[toe+wBot-cov-1.6, g.H-cov*2]] },
+      { layer:'REBAR_BASE',       pts:[[cov+1.1, cov+1.1],[BW-cov-1.1, cov+1.1]] },
+      { layer:'REBAR_BASE_TOP',   pts:[[cov+1.1, BT-cov-1.1],[BW-cov-1.1, BT-cov-1.1]] },
+    ];
+
+    const spZ = 30;
+    for(let z=spZ/2; z<L; z+=spZ) {
+      rebarZones.forEach(zone=>{
+        const [[x1,y1],[x2,y2]]=zone.pts;
+        ents.push(line3d(x1,y1,z,x2,y2,z,zone.layer));
+      });
+    }
+    // longitudinal rebars along Z
+    const longPts = [
+      [toe+cov+1.6, BT+wallH*0.5, 'REBAR_WALL_FRONT'],
+      [toe+wBot-cov-1.6, BT+wallH*0.5, 'REBAR_WALL_BACK'],
+      [BW/4, cov+1.1, 'REBAR_BASE'],
+      [BW*3/4, cov+1.1, 'REBAR_BASE'],
+    ];
+    longPts.forEach(([x,y,layer])=>{
+      ents.push(line3d(x,y,0,x,y,L,layer));
+    });
+
+    // Dimensions
+    if(document.getElementById('dxf_dim')?.checked!==false){
+      ents.push(text(BW/2,- 30,0,20,`T=${BW}cm`,'DIMENSIONS'));
+      ents.push(text(-50,g.H/2,0,20,`H=${g.H}cm`,'DIMENSIONS'));
+      ents.push(text(toe+wBot/2,g.H+20,0,15,`W=${wBot}cm`,'DIMENSIONS'));
+    }
+
+    return ents.join('\n');
+  }
+
+  header();
+  tables();
+  lines.push('0\nSECTION\n2\nENTITIES');
+  lines.push(entities());
+  lines.push('0\nENDSEC\n0\nEOF');
+  return lines.join('\n');
+}
+
+function generateDXFPreview() {
+  dxfContent = buildDXF();
+  const preview = dxfContent.split('\n').slice(0,40).join('\n') + '\n...(共 ' + dxfContent.split('\n').length + ' 行)';
+  document.getElementById('dxf-preview').textContent = preview;
+}
+
+function exportDXF() {
+  dxfContent = buildDXF();
+  const g = G();
+  const blob = new Blob([dxfContent], {type:'application/dxf'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href=url; a.download=`R-008_H${g.H}_B${g.BWIDTH}_3D.dxf`; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function copyDXF() {
+  if(!dxfContent) dxfContent=buildDXF();
+  navigator.clipboard.writeText(dxfContent).then(()=>alert('DXF 已複製到剪貼簿'));
+}
+
+// ════════════════════════════════════════════════
+//  MAIN
+// ════════════════════════════════════════════════
+function recalcAll() {
+  draw3D();
+  renderSectionResults();
+  drawSection();
+  renderRebarResults();
+  drawRebar();
+  const g=G();
+  document.getElementById('model-label').textContent=`R-008 擋土牆  H=${(g.H/100).toFixed(2)}m  B=${(g.BWIDTH/100).toFixed(2)}m`;
+}
+
+window.addEventListener('load', ()=>{
+  initCanvas3D();
+  buildRebarUI();
+  recalcAll();
+});
+
+window.addEventListener('resize', ()=>{
+  draw3D(); drawSection(); drawRebar();
+});
+</script>
+</body>
+</html>
