@@ -349,20 +349,20 @@
         <div class="form-row">
           <label>牆高 H</label>
           <div class="stepper"><button onclick="step('H',-10)">−</button></div>
-          <input type="number" id="H" value="1050" oninput="recalcAll()">
+          <input type="number" id="H" value="1050" oninput="debouncedRecalc()">
           <div class="stepper"><button onclick="step('H',10)">+</button></div>
           <span class="unit">cm</span>
         </div>
         <div class="form-row">
           <label>段落長 L</label>
           <div class="stepper"><button onclick="step('L',-10)">−</button></div>
-          <input type="number" id="L" value="100" oninput="recalcAll()">
+          <input type="number" id="L" value="100" oninput="debouncedRecalc()">
           <div class="stepper"><button onclick="step('L',10)">+</button></div>
           <span class="unit">cm</span>
         </div>
         <div class="form-row">
           <label>覆土深 Hs</label>
-          <input type="number" id="Hs" value="50" oninput="recalcAll()">
+          <input type="number" id="Hs" value="50" oninput="debouncedRecalc()">
           <span class="unit">cm</span>
         </div>
       </div>
@@ -371,14 +371,14 @@
     <div class="card">
       <div class="card-header"><div class="dot" style="background:var(--accent2)"></div>斷面尺寸</div>
       <div class="card-body">
-        <div class="form-row"><label>J (牆厚頂)</label><input type="number" id="J" value="60" oninput="recalcAll()"><span class="unit">cm</span></div>
-        <div class="form-row"><label>E (牆厚差)</label><input type="number" id="E" value="105" oninput="recalcAll()"><span class="unit">cm</span></div>
-        <div class="form-row"><label>TOE</label><input type="number" id="TOE" value="75" oninput="recalcAll()"><span class="unit">cm</span></div>
-        <div class="form-row"><label>HEEL</label><input type="number" id="HEEL" value="285" oninput="recalcAll()"><span class="unit">cm</span></div>
-        <div class="form-row"><label>Wb底</label><input type="number" id="WBOT" value="90" oninput="recalcAll()"><span class="unit">cm</span></div>
-        <div class="form-row"><label>Wt頂</label><input type="number" id="WTOP" value="60" oninput="recalcAll()"><span class="unit">cm</span></div>
-        <div class="form-row"><label>底板總寬</label><input type="number" id="BWIDTH" value="450" oninput="recalcAll()"><span class="unit">cm</span></div>
-        <div class="form-row"><label>底板厚 d</label><input type="number" id="BTHICK" value="90" oninput="recalcAll()"><span class="unit">cm</span></div>
+        <div class="form-row"><label>J (牆厚頂)</label><input type="number" id="J" value="60" oninput="debouncedRecalc()"><span class="unit">cm</span></div>
+        <div class="form-row"><label>E (牆厚差)</label><input type="number" id="E" value="105" oninput="debouncedRecalc()"><span class="unit">cm</span></div>
+        <div class="form-row"><label>TOE</label><input type="number" id="TOE" value="75" oninput="debouncedRecalc()"><span class="unit">cm</span></div>
+        <div class="form-row"><label>HEEL</label><input type="number" id="HEEL" value="285" oninput="debouncedRecalc()"><span class="unit">cm</span></div>
+        <div class="form-row"><label>Wb底</label><input type="number" id="WBOT" value="90" oninput="debouncedRecalc()"><span class="unit">cm</span></div>
+        <div class="form-row"><label>Wt頂</label><input type="number" id="WTOP" value="60" oninput="debouncedRecalc()"><span class="unit">cm</span></div>
+        <div class="form-row"><label>底板總寬</label><input type="number" id="BWIDTH" value="450" oninput="debouncedRecalc()"><span class="unit">cm</span></div>
+        <div class="form-row"><label>底板厚 d</label><input type="number" id="BTHICK" value="90" oninput="debouncedRecalc()"><span class="unit">cm</span></div>
         <div class="hint">底板總寬 = TOE + 牆底厚 + HEEL</div>
       </div>
     </div>
@@ -386,12 +386,12 @@
     <div class="card">
       <div class="card-header"><div class="dot" style="background:var(--accent3)"></div>土壤參數</div>
       <div class="card-body">
-        <div class="form-row"><label>γ 土單重</label><input type="number" id="gamma" value="1.8" step="0.1" oninput="recalcAll()"><span class="unit">t/m³</span></div>
-        <div class="form-row"><label>φ 摩擦角</label><input type="number" id="phi" value="30" oninput="recalcAll()"><span class="unit">°</span></div>
-        <div class="form-row"><label>fs 摩擦係</label><input type="number" id="fs" value="0.5" step="0.05" oninput="recalcAll()"><span class="unit">—</span></div>
-        <div class="form-row"><label>qa 容許承</label><input type="number" id="qa" value="30" oninput="recalcAll()"><span class="unit">t/m²</span></div>
-        <div class="form-row"><label>fc' 混凝土</label><input type="number" id="fc" value="280" oninput="recalcAll()"><span class="unit">kgf</span></div>
-        <div class="form-row"><label>fy 鋼筋</label><input type="number" id="fy" value="4200" oninput="recalcAll()"><span class="unit">kgf</span></div>
+        <div class="form-row"><label>γ 土單重</label><input type="number" id="gamma" value="1.8" step="0.1" oninput="debouncedRecalc()"><span class="unit">t/m³</span></div>
+        <div class="form-row"><label>φ 摩擦角</label><input type="number" id="phi" value="30" oninput="debouncedRecalc()"><span class="unit">°</span></div>
+        <div class="form-row"><label>fs 摩擦係</label><input type="number" id="fs" value="0.5" step="0.05" oninput="debouncedRecalc()"><span class="unit">—</span></div>
+        <div class="form-row"><label>qa 容許承</label><input type="number" id="qa" value="30" oninput="debouncedRecalc()"><span class="unit">t/m²</span></div>
+        <div class="form-row"><label>fc' 混凝土</label><input type="number" id="fc" value="280" oninput="debouncedRecalc()"><span class="unit">kgf</span></div>
+        <div class="form-row"><label>fy 鋼筋</label><input type="number" id="fy" value="4200" oninput="debouncedRecalc()"><span class="unit">kgf</span></div>
       </div>
     </div>
 
@@ -570,6 +570,10 @@ const rebarDefs = [
   { id:'rb9', label:'⑨ 跟部筋(上)',    color:'#b06bff', dia:13, sp:30, on:true },
 ];
 
+// debounce：輸入停止 500ms 後才重新計算，避免打字 lag
+let _dt = null;
+function debouncedRecalc() { clearTimeout(_dt); _dt = setTimeout(recalcAll, 500); }
+
 function step(id, delta) {
   const el = document.getElementById(id);
   el.value = Math.max(0, +el.value + delta);
@@ -624,122 +628,191 @@ function project(x,y,z,cx,cy,scale,rx,ry){
 function draw3D() {
   const canvas = document.getElementById('canvas3d');
   const W = canvas.offsetWidth, H = canvas.offsetHeight;
+  if(!W||!H) return;
   canvas.width = W; canvas.height = H;
   const ctx = canvas.getContext('2d');
-  ctx.clearRect(0,0,W,H);
 
-  // gradient bg
+  // 背景
   const grad = ctx.createRadialGradient(W/2,H/2,10,W/2,H/2,Math.max(W,H)*0.7);
   grad.addColorStop(0,'#0b1220'); grad.addColorStop(1,'#060a10');
   ctx.fillStyle=grad; ctx.fillRect(0,0,W,H);
 
   const g = G();
+  const BW=g.BWIDTH, BT=g.BTHICK, L=g.L;
+  const wallH=g.H-BT, toe=g.TOE, wBot=g.WBOT, wTop=g.WTOP;
+  const cov=7.5;
+  // 牆背斜率：底寬 wBot，頂寬 wTop，高度 wallH => 背面偏移
+  const wallSlant = wBot - wTop; // 背面往外傾斜量 (cm)
+
+  // ── 座標系：X=牆寬, Y=沿牆長(=Z方向), Z=高度 ──
+  // 統一縮放：讓整個模型在畫面內
+  const diag = Math.sqrt(BW*BW + L*L);
+  const maxDim = Math.max(g.H*1.1, diag*0.8);
+  const sc = cam.scale * Math.min(W,H) / (maxDim * 1.8);
   const cx = W/2 + cam.tx, cy = H/2 + cam.ty;
-  const sc = cam.scale * Math.min(W,H) / (g.H * 2.2);
-  const {rx,ry} = cam;
+  const {rx, ry} = cam;
 
-  // build vertices
-  const BW = g.BWIDTH, BT = g.BTHICK, L = g.L;
-  const wallH = g.H - BT;
-  const wallBotW = g.WBOT, wallTopW = g.WTOP;
-  const toe = g.TOE;
+  // 投影函式：模型座標 (x=寬, y=長, z=高) → 畫面
+  function pt(x, y, z) {
+    // 以模型中心為原點
+    const px = x - BW/2, py = y - L/2, pz = z - g.H/2;
+    // 旋轉 Y 軸 (左右轉)
+    const rx1 = px*Math.cos(ry) - py*Math.sin(ry);
+    const ry1 = px*Math.sin(ry) + py*Math.cos(ry);
+    // 旋轉 X 軸 (上下轉)
+    const rz2 = pz*Math.cos(rx) - ry1*Math.sin(rx);
+    const ry2 = pz*Math.sin(rx) + ry1*Math.cos(rx);
+    return { sx: cx + rx1*sc, sy: cy - rz2*sc, depth: ry2 };
+  }
 
-  // 8-point outline prism
-  // cross-section: bottom-left origin at (0,0)
+  function line(x1,y1,z1, x2,y2,z2, color, lw=1){
+    const a=pt(x1,y1,z1), b=pt(x2,y2,z2);
+    ctx.beginPath(); ctx.moveTo(a.sx,a.sy); ctx.lineTo(b.sx,b.sy);
+    ctx.strokeStyle=color; ctx.lineWidth=lw; ctx.stroke();
+  }
+
+  function polyFace(pts3d, fill, stroke, lw=0.8){
+    const p2 = pts3d.map(([x,y,z])=>pt(x,y,z));
+    ctx.beginPath();
+    ctx.moveTo(p2[0].sx,p2[0].sy);
+    p2.forEach(p=>ctx.lineTo(p.sx,p.sy));
+    ctx.closePath();
+    if(fill){ctx.fillStyle=fill;ctx.fill();}
+    if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=lw;ctx.stroke();}
+  }
+
+  // ── 斷面頂點 (x=寬, z=高)，Y方向拉伸 ──
+  // 斷面點 [x, z]
   const cs = [
-    [0, 0],
-    [BW, 0],
-    [BW, BT],
-    [toe+wallBotW, BT],
-    [toe+wallTopW+(g.E/10), g.H],   // wall top-right (tapered)
-    [toe, g.H],                      // wall top-left
-    [toe, BT],
-    [0, BT],
+    [0,       0],           // 0 底板左下
+    [BW,      0],           // 1 底板右下
+    [BW,      BT],          // 2 底板右上
+    [toe+wBot,BT],          // 3 牆身右下
+    [toe+wBot-wallSlant, g.H], // 4 牆身右上（背面斜）
+    [toe,     g.H],         // 5 牆身左上
+    [toe,     BT],          // 6 牆身左下
+    [0,       BT],          // 7 底板左上
   ];
 
-  function pt(xi,yi,zi){ return project((xi-BW/2)*0.01,(yi-g.H/2)*0.01,(zi-L/2)*0.01,cx,cy,sc*100,rx,ry); }
+  // 面列表 [斷面點索引陣列, Y=0面還是Y=L面, 排序深度]
+  const faceList = [];
+  // 前面 (y=0)
+  const front3d = cs.map(([x,z])=>[x,0,z]);
+  // 後面 (y=L)
+  const back3d  = cs.map(([x,z])=>[x,L,z]);
 
-  function face(pts2d, fill, stroke, lw=1){
-    ctx.beginPath();
-    ctx.moveTo(pts2d[0].sx, pts2d[0].sy);
-    pts2d.forEach(p=>ctx.lineTo(p.sx,p.sy));
-    ctx.closePath();
-    if(fill){ ctx.fillStyle=fill; ctx.fill(); }
-    if(stroke){ ctx.strokeStyle=stroke; ctx.lineWidth=lw; ctx.stroke(); }
-  }
+  // 計算面平均深度
+  const faceDepth = pts => pts.reduce((s,[x,y,z])=>s+pt(x,y,z).depth,0)/pts.length;
 
-  const faces = [];
-  // generate 6 faces
-  const front  = cs.map(([x,y])=>pt(x,y,0));
-  const back   = cs.map(([x,y])=>pt(x,y,L));
-
-  // compute average z for sorting
-  const fz = arr=>arr.reduce((s,p)=>s+p.z,0)/arr.length;
-
-  // Side faces between consecutive cross-section points
+  // 側面
   for(let i=0;i<cs.length;i++){
     const n=(i+1)%cs.length;
-    faces.push({ verts:[front[i],front[n],back[n],back[i]], z: fz([front[i],front[n],back[n],back[i]]) });
+    const f = [
+      [cs[i][0],0,cs[i][1]],[cs[n][0],0,cs[n][1]],
+      [cs[n][0],L,cs[n][1]],[cs[i][0],L,cs[i][1]]
+    ];
+    faceList.push({pts:f, depth:faceDepth(f)});
   }
-  faces.push({ verts:front, z:fz(front), isFront:true });
-  faces.push({ verts:back,  z:fz(back),  isBack:true });
+  faceList.push({pts:front3d, depth:faceDepth(front3d)});
+  faceList.push({pts:back3d,  depth:faceDepth(back3d)});
+  faceList.sort((a,b)=>a.depth-b.depth);
 
-  faces.sort((a,b)=>a.z-b.z);
-
-  const solidColor = 'rgba(20,45,75,0.75)';
-  const wireColor  = 'rgba(0,180,255,0.8)';
-
-  faces.forEach(f=>{
+  // 繪製面
+  faceList.forEach(f=>{
     if(renderMode==='solid'||renderMode==='both')
-      face(f.verts, solidColor, null);
+      polyFace(f.pts,'rgba(15,40,70,0.7)',null);
     if(renderMode==='wire'||renderMode==='both')
-      face(f.verts, null, wireColor, 0.8);
+      polyFace(f.pts,null,'rgba(0,180,255,0.75)',0.8);
   });
 
-  // draw rebars
-  const enabledRebars = rebarDefs.filter(r=>{
-    const cb = document.getElementById('cb_'+r.id);
-    return cb ? cb.checked : r.on;
-  });
+  // ── 鋼筋 ──
+  // 取目前鋼筋間距設定
+  function getRbSp(id){ return +(document.getElementById('sp_'+id)?.value||30); }
+  function getRbOn(id){ return document.getElementById('cb_'+id)?.checked!==false; }
 
-  enabledRebars.forEach(rb=>{
-    // simplified: draw rebar lines along Z axis at representative XY positions
-    const rebarPositions = getRebarXY(rb.id, g);
-    rebarPositions.forEach(([rx2,ry2])=>{
-      const p0 = pt(rx2,ry2,0), p1 = pt(rx2,ry2,L);
-      ctx.beginPath();
-      ctx.moveTo(p0.sx,p0.sy); ctx.lineTo(p1.sx,p1.sy);
-      ctx.strokeStyle=rb.color; ctx.lineWidth=1.5; ctx.stroke();
+  // 縱向鋼筋（沿Y方向=牆長方向畫線）
+  // 每根鋼筋定義為 [x, z] 位置
+  function drawLongRebar(positions, color){
+    positions.forEach(([x,z])=>{
+      line(x,0,z, x,L,z, color, 1.5);
     });
-  });
+  }
 
-  // axis
-  const O = pt(0,0,0), X = pt(60,0,0), Y = pt(0,60,0), Z = pt(0,0,60);
-  [[O,X,'#ff4a6e','X'],[O,Y,'#4dff91','Y'],[O,Z,'#4a90ff','Z']].forEach(([a,b,c,label])=>{
-    ctx.beginPath(); ctx.moveTo(a.sx,a.sy); ctx.lineTo(b.sx,b.sy);
-    ctx.strokeStyle=c; ctx.lineWidth=1.5; ctx.stroke();
-    ctx.fillStyle=c; ctx.font='bold 10px JetBrains Mono'; ctx.fillText(label,b.sx+4,b.sy+4);
+  // 橫向/水平鋼筋（在XZ斷面，沿Y方向每隔sp畫一根線）
+  function drawTransRebar(x1,z1,x2,z2, color, sp){
+    for(let y=sp/2; y<=L; y+=sp){
+      line(x1,y,z1, x2,y,z2, color, 1.2);
+    }
+  }
+
+  if(getRbOn('rb1')){
+    // 牆身主筋前 — 沿高度每sp一根，沿牆長延伸
+    const sp=getRbSp('rb1');
+    for(let z=BT+sp/2; z<g.H-cov; z+=sp)
+      drawLongRebar([[toe+cov+1.6, z]], rebarDefs[0].color);
+  }
+  if(getRbOn('rb2')){
+    const sp=getRbSp('rb2');
+    for(let z=BT+sp/2; z<g.H-cov; z+=sp)
+      drawLongRebar([[toe+wBot-cov-1.6, z]], rebarDefs[1].color);
+  }
+  if(getRbOn('rb3')){
+    // 牆身水平箍筋 — 每sp一道，在牆身XZ斷面畫橫線
+    const sp=getRbSp('rb3');
+    drawTransRebar(toe+cov, BT+sp/2, toe+wBot-cov, BT+sp/2, rebarDefs[2].color, sp);
+    for(let z=BT+sp; z<g.H-cov; z+=sp)
+      drawTransRebar(toe+cov, z, toe+wBot-cov, z, rebarDefs[2].color, sp);
+  }
+  if(getRbOn('rb4')){
+    // 底板主筋下層 — 沿底板寬每sp一根，沿牆長延伸
+    const sp=getRbSp('rb4');
+    for(let x=sp/2; x<BW; x+=sp)
+      drawLongRebar([[x, cov+1.1]], rebarDefs[3].color);
+  }
+  if(getRbOn('rb5')){
+    // 底板主筋上層
+    const sp=getRbSp('rb5');
+    for(let x=sp/2; x<BW; x+=sp)
+      drawLongRebar([[x, BT-cov-1.1]], rebarDefs[4].color);
+  }
+  if(getRbOn('rb6')){
+    // 底板分佈筋 — 橫向
+    const sp=getRbSp('rb6');
+    for(let y=sp/2; y<=L; y+=sp)
+      line(cov,y,BT/2, BW-cov,y,BT/2, rebarDefs[5].color, 1.2);
+  }
+  if(getRbOn('rb7')){
+    // 趾部筋 — 沿趾部底板縱向
+    const sp=getRbSp('rb7');
+    for(let x=sp/2; x<toe; x+=sp)
+      drawLongRebar([[x, cov+1.1]], rebarDefs[6].color);
+  }
+  if(getRbOn('rb8')){
+    // 跟部筋下
+    const sp=getRbSp('rb8');
+    for(let x=toe+wBot+sp/2; x<BW-cov; x+=sp)
+      drawLongRebar([[x, cov+1.1]], rebarDefs[7].color);
+  }
+  if(getRbOn('rb9')){
+    // 跟部筋上
+    const sp=getRbSp('rb9');
+    for(let x=toe+wBot+sp/2; x<BW-cov; x+=sp)
+      drawLongRebar([[x, BT-cov-1.1]], rebarDefs[8].color);
+  }
+
+  // ── 座標軸 ──
+  const axLen=Math.max(40, BW*0.12);
+  line(0,0,0, axLen,0,0, '#ff4a6e',1.5);
+  line(0,0,0, 0,axLen,0, '#4dff91',1.5);
+  line(0,0,0, 0,0,axLen, '#4a90ff',1.5);
+  const lX=pt(axLen+5,0,0), lY=pt(0,axLen+5,0), lZ=pt(0,0,axLen+5);
+  ctx.font='bold 10px JetBrains Mono';
+  [['X',lX,'#ff4a6e'],['Y',lY,'#4dff91'],['Z',lZ,'#4a90ff']].forEach(([t,p,c])=>{
+    ctx.fillStyle=c; ctx.fillText(t,p.sx,p.sy);
   });
 
   document.getElementById('dim-label').textContent =
     `H=${(g.H/100).toFixed(2)}m  B=${(g.BWIDTH/100).toFixed(2)}m  L=${(g.L/100).toFixed(2)}m`;
-}
-
-function getRebarXY(id, g) {
-  const cov=7.5, toe=g.TOE, BT=g.BTHICK, BW=g.BWIDTH, wallH=g.H-BT;
-  const wBot=g.WBOT, wTop=g.WTOP;
-  switch(id){
-    case 'rb1': return [[toe+cov+1.6, BT+wallH*0.25],[toe+cov+1.6, BT+wallH*0.75]];
-    case 'rb2': return [[toe+wBot-cov-1.6, BT+wallH*0.25],[toe+wBot-cov-1.6, BT+wallH*0.65]];
-    case 'rb3': return [[toe+cov+1.6, BT+wallH*0.4],[toe+wBot-cov-1.6, BT+wallH*0.4]];
-    case 'rb4': return [[toe/2, cov+1.1],[BW-g.HEEL/2, cov+1.1]];
-    case 'rb5': return [[toe/2, BT-cov-1.1],[BW-g.HEEL/2, BT-cov-1.1]];
-    case 'rb6': return [[BW/4, BT/2],[BW*3/4, BT/2]];
-    case 'rb7': return [[toe/2, BT/3],[toe/2, BT*2/3]];
-    case 'rb8': return [[BW-g.HEEL/2, BT/3]];
-    case 'rb9': return [[BW-g.HEEL/3, BT*2/3]];
-    default: return [];
-  }
 }
 
 // ════════════════════════════════════════════════
